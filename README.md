@@ -566,17 +566,27 @@ SELECT string_agg(v,'') AS ret FROM results
 ## TODO
 
 Simple stuff to do:
+
 Do something about grafana time sql issue (see notes on ```$interval``` on https://github.com/sysadminmike/postgres-influx-mimic)
+
 Alter grafana sql entry field to a memo/textarea to and allow for charidge returns to make sql editing simpler.
+
 Perhaps simplify sql creation with pg function? 
+
 Needs a better name - suggestions please.
 
+
+
 Further metrics data sources ideas:
+
 couch monitoring - https://github.com/gws/munin-plugin-couchdb - maybe just dump /_stats periodically as a new doc into couch?
+
 snmp - add metric data from snmp source
+
 fluentd - https://github.com/ixixi/fluent-plugin-couch - log stuff instead of logstash and elasticsearch
 
 make a grafana panel to search log stuff like kibana/splunk - with filter box to pass filter text to sql like $interval for time - so graphs and logs can be viewed on the same dashboard and at the same time - help please
+
 maybe add a filer $text for sql like $interval on normal graph panel for quick drill down without having to edit all sql - help please
 
 
