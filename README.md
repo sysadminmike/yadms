@@ -175,6 +175,9 @@ CREATE INDEX all_metrics_name
 
 You should see the couchdb docs appearing in postgres.
 
+### couch-to-influx
+https://github.com/sysadminmike/couch-to-influx
+Instead of postgres you could pump the data into influxdb - note this needs work and was initially for statsd metrics so may need some work for symux metrics and do not think this can be used for logs and other odd metric data postgres will be able to handle.  Personally I didnt get on with influxdb on freebsd so am not using it.
 
 ## Grafana 
 
