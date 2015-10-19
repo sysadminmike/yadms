@@ -597,4 +597,9 @@ make a grafana panel to search log stuff like kibana/splunk - with filter box to
 
 maybe add a filer $text for sql like $interval on normal graph panel for quick drill down without having to edit all sql - help please
 
-example rollup stuff for aggregate/archiving/make new tables in postgres based on timestamp - pg function(s) to be run periodically to automate? - note with over 2 million docs the dashboard with 6 graphs and multiple series takes under 3 secs to redraw all of them with where clause on the timestamps at 24hrs so all datapoints for last 24hrs are being loaded.
+example pouchdb to couchdb collecting metrics from mobile device / web browser 
+
+example adding metric via curl post/put to couch 
+
+example rollup stuff for aggregate/archiving/make new tables in postgres based on timestamp - pg function(s) to be run periodically to automate? - note with over 2 million docs the dashboard with 6 graphs and multiple series takes under 3 secs to redraw all of them with where clause on the timestamps at 24hrs so all datapoints for last 24hrs are being loaded. - note on http_pgsql extension to deal with managing/archivng couchdbs.
+
