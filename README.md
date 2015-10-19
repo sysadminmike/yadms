@@ -55,7 +55,8 @@ See http://wpd.home.xs4all.nl/symon/documentation.html for more info on symon an
 In this example its assumed couchdb is installed on this machine but it is possible to run these services however is required and they dont have to be on the same machine or even in the same network but if connectivity is lost between the bits then metrics will be lost.
 
 
-### symux - http://wpd.home.xs4all.nl/symon/documentation.html
+### symux 
+http://wpd.home.xs4all.nl/symon/documentation.html
 
 Install symux and edit ``symux.conf``` as needed.
 
@@ -88,7 +89,8 @@ Escape character is '^]'.
 ```
 
 
-### symux-to-couch -  https://github.com/sysadminmike/symux-to-couch
+### symux-to-couch
+https://github.com/sysadminmike/symux-to-couch
 
 Install ```npm i symux-to-couch``` and edit as required (couchdb and symux info) also add each host and name to this as symux outputs ip and not hostname.
 
@@ -141,8 +143,7 @@ Note: Instead of using a single all_metrics database you can use a database per 
 Also need to test delete stuff and make sure it works for delete when not done via bulk deletes?
 
 ### couch-to-postgres
-
-More info: https://github.com/sysadminmike/couch-to-postgres
+https://github.com/sysadminmike/couch-to-postgres
 
 ```
 npm i couch-to-postgres
