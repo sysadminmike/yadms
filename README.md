@@ -140,7 +140,9 @@ Doc to add to _replicator on all_metrics couchdb host (need one per datacenter/l
 Note: Instead of using a single all_metrics database you can use a database per location.
 Also need to test delete stuff and make sure it works for delete when not done via bulk deletes?
 
-### couch-to-postgres - https://github.com/sysadminmike/couch-to-postgres
+### couch-to-postgres
+
+More info: https://github.com/sysadminmike/couch-to-postgres
 
 ```
 npm i couch-to-postgres
