@@ -10,21 +10,28 @@ There is no loss of resolution like with rrd files or time series databases as t
 Allows for flexible collection of metrics with no strict schema making it very simple to add extra datasources.
 
 
-# Setup of host(s) sending metrics
+## Setup of host(s) sending metrics
 
 Install symon without symux:
 
 FreeBSD 
+
 ```portmaster -mWITHOUT_SYMUX=yes sysutils/symon```
+
 Add ```symon_enable="YES"``` to ```/etc/rc.conf```
+
 Config location: ```/usr/local/etc/symon.conf```
 
+
 OpenBSD 
+
 ```pkg_add symon-mon-version.tgz``` config location: ```/etc/symon.conf```
+
 
 Linux - http://wpd.home.xs4all.nl/symon/documentation.html
 
 Windows - https://github.com/ValHazelwood/SymonClient
+
 
 Edit ```symon.conf``` as needed eg:
 
@@ -43,15 +50,12 @@ See http://wpd.home.xs4all.nl/symon/documentation.html for more info on symon an
 
 
 
-
-
-
-# Setup of metrics collection host at each separated datacenter/location.  
+## Setup of metrics collection host at each separated datacenter/location.  
 
 In this example its assumed couchdb is installed on this machine but it is possible to run these services however is required and they dont have to be on the same machine or even in the same network but if connectivity is lost between the bits then metrics will be lost.
 
 
-## symux - http://wpd.home.xs4all.nl/symon/documentation.html
+### symux - http://wpd.home.xs4all.nl/symon/documentation.html
 
 Install symux and edit ``symux.conf``` as needed.
 
@@ -74,6 +78,7 @@ source 192.168.0.3 {
 Note: Ther is no need for any write options like: ```write if(sis1) in "/var/www/symon/rrds/4512/if_sis1.rrd"``` - symux will output a warning when starting which can be ignored.
 
 Test all is ok by telneting to it and check you can see packets from the symon hosts coming to symux host:
+
 ```
 $ telnet 192.168.0.10 2100
 Trying 192.168.0.10...
@@ -83,17 +88,19 @@ Escape character is '^]'.
 ```
 
 
-## symux-to-couch -  https://github.com/sysadminmike/symux-to-couch
+### symux-to-couch -  https://github.com/sysadminmike/symux-to-couch
 
 Install ```npm i symux-to-couch``` and edit as required (couchdb and symux info) also add each host and name to this as symux outputs ip and not hostname.
+
 Run it ```node symux-to-couch.js``` and you should start to see documents being added to couchdb.
 
 
-## statsd
+### statsd
 
 If needed statsd with https://github.com/sysadminmike/couch-statsd-backend this will allow statsd clients in this datacenter/location to send stats to couch and be sent to central location along with symon and other metrics.  For example from collectd when https://github.com/collectd/collectd/pull/1296 is merged it will be possible to use collectd metrics as well.
 
-## Other
+
+### Other
 Possibly turn this host into a log server for the datacenter/location and add fluentd to ship logs to couch.
 
 
@@ -101,15 +108,14 @@ Possibly turn this host into a log server for the datacenter/location and add fl
 
 
 
-# Setup of host(s) to view/anaylise/graph metrics 
+## Setup of host(s) to view/anaylise/graph metrics 
 
 Assumes couchdb, postgres, grafana all ready.
 
-## couchdb replication 
 
-In order to collect all of the couchdb docs to a central location the following 
-design doc required is required in each 'metric' database per datacenter/location/satelite couchdb,
-this allows for the periodic clearing up of these couchdbs without affecting the 'all_metrics' database.
+### couchdb replication 
+
+In order to collect all of the couchdb docs to a central location the following design doc required is required in each 'metric' database per datacenter/location/satelite couchdb, this allows for the periodic clearing up of these couchdbs without affecting the 'all_metrics' database.
 
 ```
 {
@@ -134,7 +140,7 @@ Doc to add to _replicator on all_metrics couchdb host (need one per datacenter/l
 Note: Instead of using a single all_metrics database you can use a database per location.
 
 
-## couch-to-postgres - https://github.com/sysadminmike/couch-to-postgres
+### couch-to-postgres - https://github.com/sysadminmike/couch-to-postgres
 
 ```
 npm i couch-to-postgres
@@ -165,11 +171,11 @@ CREATE INDEX all_metrics_name
 You should see the couchdb docs appearing in postgres.
 
 
-# Grafana 
+## Grafana 
 
 In order to get the data into grafana we need postgres to pretend to be influxdb.
 
-##postgres-influx-mimic
+###postgres-influx-mimic
 
 ```npm i postgres-influx-mimic```
 
@@ -181,9 +187,9 @@ Add this as an influxdb datasource to grafana.
 
 
 
-# Example of graphing symux resources from postgres:
+## Example of graphing symux resources from postgres:
 
-## load
+### load
 
 example doc:
 ```
@@ -242,7 +248,7 @@ SELECT string_agg(v,'') AS ret FROM results
 ![Example load graph 2](/pics/metrics-load-2.png)
 
 
-## cpu
+### cpu
 
 ```
 {
@@ -310,7 +316,7 @@ SELECT string_agg(v,'') AS ret FROM results
 
 
 
-## if
+### if
 
 ```
 {
@@ -394,7 +400,7 @@ SELECT string_agg(v,'') AS ret FROM results
 ![Example if graph](/pics/metrics-if.png)
 
 
-## mem
+### mem
 
 ```
 {
@@ -470,7 +476,7 @@ SELECT string_agg(v,'') AS ret FROM results
 ![Example mem graph](/pics/metrics-mem.png)
 
 
-## io
+### io
 
 ```
 {
@@ -522,7 +528,7 @@ SELECT string_agg(v,'') AS  ret FROM results
 
 
 
-# statsd counter metric example
+### statsd counter metric example
 
 ```
 {
@@ -557,7 +563,7 @@ SELECT string_agg(v,'') AS ret FROM results
 ![Example statsd graph](/pics/metrics-statsd.png)
 
 
-# TODO
+## TODO
 
 Simple stuff to do:
 Do something about grafana time sql issue (see notes on ```$interval``` on https://github.com/sysadminmike/postgres-influx-mimic)
