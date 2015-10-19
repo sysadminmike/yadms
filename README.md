@@ -2,8 +2,8 @@
 Yet another distributed metrics setup
 
 ![Example Setup](/pics/example-setup.png)
+
 ![Example Graph 1](/pics/example-1.png)
-![Example Graph 2](/pics/example-2.png)
 
 There is no loss of resolution like with rrd files or time series databases as time passes - its up to however you need to manage your metrics to aggregate/roll them up as required but with TB hard disks so cheap for small setups keeping all metrics is more than possible.
 
