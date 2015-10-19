@@ -138,7 +138,7 @@ Doc to add to _replicator on all_metrics couchdb host (need one per datacenter/l
 ```
 
 Note: Instead of using a single all_metrics database you can use a database per location.
-
+Also need to test delete stuff and make sure it works for delete when not done via bulk deletes?
 
 ### couch-to-postgres - https://github.com/sysadminmike/couch-to-postgres
 
@@ -567,9 +567,9 @@ SELECT string_agg(v,'') AS ret FROM results
 
 Simple stuff to do:
 
-Do something about grafana time sql issue (see notes on ```$interval``` on https://github.com/sysadminmike/postgres-influx-mimic)
+Do something about grafana time sql issue (see notes on ```timeFilter``` and  ```$interval``` on https://github.com/sysadminmike/postgres-influx-mimic)
 
-Alter grafana sql entry field to a memo/textarea to and allow for charidge returns to make sql editing simpler.
+Alter grafana sql entry field to a memo/textarea to and allow for new lines to make sql editing simpler.
 
 Perhaps simplify sql creation with pg function? 
 
