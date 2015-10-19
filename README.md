@@ -115,7 +115,7 @@ Assumes couchdb, postgres, grafana all ready.
 
 ### couchdb replication 
 
-In order to collect all of the couchdb docs to a central location the following design doc required is required in each 'metric' database per datacenter/location/satelite couchdb, this allows for the periodic clearing up of these couchdbs without affecting the 'all_metrics' database.
+In order to collect all of the couchdb docs to a central location the following design doc is required in each 'metric' database per datacenter/location/satelite couchdb, this allows for the periodic clearing up of these couchdbs without affecting the 'all_metrics' database.
 
 ```
 {
