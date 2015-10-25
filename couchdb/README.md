@@ -215,8 +215,62 @@ results AS (
 SELECT string_agg(v,'') AS ret FROM results
 ```
 
-![Example couch read/writes per min](/couchdb/pics/couch-http-status-codes.png)
+![Example couch status codes per min](/couchdb/pics/couch-http-status-codes.png)
 Note: Ledgend min, max, avg, current and total are from grafana and not the couch stats doc.
+
+
+### httpd info per minute
+
+```
+
+WITH httpd AS (
+    SELECT (doc->>'ts')::numeric * 1000 AS  time,
+         ((doc->'httpd'->'clients_requesting_changes'->>'current')::numeric - lag((doc->'httpd'->'clients_requesting_changes'->>'current')::numeric, 1) OVER w )
+           / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1) OVER w)::numeric AS clients_requesting_changes_per_sec,
+         ((doc->'httpd'->'requests'->>'current')::numeric - lag((doc->'httpd'->'requests'->>'current')::numeric, 1) OVER w )
+           / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1) OVER w)::numeric AS requests_per_sec,
+         ((doc->'httpd'->'bulk_requests'->>'current')::numeric - lag((doc->'httpd'->'bulk_requests'->>'current')::numeric, 1) OVER w )
+           / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1) OVER w)::numeric AS bulk_requests_per_sec,
+         ((doc->'httpd'->'view_reads'->>'current')::numeric - lag((doc->'httpd'->'view_reads'->>'current')::numeric, 1) OVER w )
+           / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1) OVER w)::numeric AS view_reads_per_sec,
+         ((doc->'httpd'->'temporary_view_reads'->>'current')::numeric - lag((doc->'httpd'->'temporary_view_reads'->>'current')::numeric, 1) OVER w )
+           / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1) OVER w)::numeric AS temporary_view_reads_per_sec
+    FROM abtest
+    WHERE doc->>'name'='mw-staging.couchdb' 
+    AND ( to_timestamp((doc->>'ts')::numeric) > now() - interval '12h')
+    WINDOW w AS  (ORDER BY (doc->>'ts')::numeric)   
+    ORDER BY time
+),         
+results AS (    
+  SELECT '{ "results": [' AS v     
+  UNION ALL           
+  
+  SELECT '{ "series": [{ "name": "clients_requesting_changes", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(clients_requesting_changes_per_sec,2)*60))  || ' }] }'
+    AS v FROM httpd 
+  UNION ALL
+  SELECT ',{ "series": [{ "name": "requests", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(requests_per_sec,2)*60))  || ' }] }'
+    AS v FROM httpd
+  UNION ALL
+  SELECT ',{ "series": [{ "name": "bulk_requests", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(bulk_requests_per_sec,2)*60))  || ' }] }'
+    AS v FROM httpd
+  UNION ALL
+  SELECT ',{ "series": [{ "name": "view_reads", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(view_reads_per_sec,2)*60))  || ' }] }'
+    AS v FROM httpd
+  UNION ALL
+  SELECT ',{ "series": [{ "name": "temporary_view_reads", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(temporary_view_reads_per_sec,2)*60))  || ' }] }'
+    AS v FROM httpd
+  UNION ALL
+  SELECT ']}' AS v   
+)
+SELECT string_agg(v,'') AS ret FROM results
+```
+
+![Example couch httpd per min](/couchdb/pics/couch-httpd.png)
+
+
+![Example couch httpd per min](/couchdb/pics/couch-httpd-and-status.png)
+
+
 
 ##Metrics on databases
 
