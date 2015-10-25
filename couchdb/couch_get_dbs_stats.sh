@@ -1,5 +1,7 @@
 #!/usr/local/bin/bash
 
+PATH=$PATH:/usr/local/bin
+
 # Script to get info from couch to make metrics from
 #
 # eg: couch_get_dbs_stats.sh couch_host metrics_host_and_db [metric-host-name]

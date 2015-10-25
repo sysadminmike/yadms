@@ -1,5 +1,7 @@
 #!/usr/local/bin/bash
 
+PATH=$PATH:/usr/local/bin
+
 # Script to get info from couch to make metrics from
 #
 # eg: couch_get_server_stats.sh http://192.168.0.3:5984  http://192.168.0.10:5984/metrics_db staging-couch
