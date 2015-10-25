@@ -91,7 +91,7 @@ results AS (
 SELECT string_agg(v,'') AS ret FROM results
 ```
 
-![Example couch open dbs and files](/pics/couchdb/couch-open-dbs-files.png)
+![Example couch open dbs and files](/couchdb/pics/couch-open-dbs-files.png)
 
 
 ### Reads / Writes per minute
@@ -123,7 +123,7 @@ results AS (
  SELECT string_agg(v,'') AS ret FROM results
 ```
 
-![Example couch read/writes per min](/pics/couchdb/couch-read-write.png)
+![Example couch read/writes per min](/couchdb/pics/couch-read-write.png)
 
 
 ##Metrics on databases
