@@ -9,6 +9,9 @@ There is no loss of resolution like with rrd files or time series databases as t
 
 Allows for flexible collection of metrics with no strict schema making it very simple to add extra datasources.
 
+Below is an example using symon/symux to collect metrics.
+
+[Couchdb metrics](./couchdb/README.mc)
 
 ## Setup of host(s) sending metrics
 
