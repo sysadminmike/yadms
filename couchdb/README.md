@@ -268,7 +268,7 @@ SELECT string_agg(v,'') AS ret FROM results
 ![Example couch httpd per min](/couchdb/pics/couch-httpd.png)
 
 
-![Example couch httpd per min](/couchdb/pics/couch-httpd-and-status.png)
+![Example couch httpd per min](/couchdb/pics/couch-httpd-and-codes.png)
 
 
 
