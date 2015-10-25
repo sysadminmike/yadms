@@ -216,7 +216,7 @@ SELECT string_agg(v,'') AS ret FROM results
 ```
 
 ![Example couch read/writes per min](/couchdb/pics/couch-http-status-codes.png)
-
+Note: Ledgend min, max, avg, current and total are from grafana and not the couch stats doc.
 
 ##Metrics on databases
 
