@@ -574,6 +574,26 @@ SELECT string_agg(v,'') AS ret FROM results
 ![Example statsd graph](/pics/metrics-statsd.png)
 
 
+## Simple POST to couchdb metric host with curl
+
+```
+echo "{ \"name\": \"myhost.mymetric\", \"type\": \"mymetric\", \"ts\": `date +%s`, \"value\": 321 }" | \
+curl -s -H "Accept: application/json" -H 'Content-Type: application/json' -X POST -d @- http://192.168.3.21:5984/abtest
+```
+
+Will add the below metric doc:
+```
+{
+   "_id": "3ad893cb4cf1560add7b4caffd4b6515",
+   "_rev": "1-eaccefb96599f0543cf5053ffb36595d",
+   "name": "myhost.mymetric",
+   "type": "mymetric",
+   "ts": 1445787153,
+   "value": 321
+}
+```
+
+
 ## TODO
 
 Simple stuff to do:
@@ -590,8 +610,6 @@ Needs a better name - suggestions please.
 
 Further metrics data sources ideas:
 
-couch monitoring - https://github.com/gws/munin-plugin-couchdb - maybe just dump /_stats periodically as a new doc into couch?
-
 snmp - add metric data from snmp source
 
 fluentd - https://github.com/ixixi/fluent-plugin-couch - log stuff instead of logstash and elasticsearch
@@ -601,8 +619,6 @@ make a grafana panel to search log stuff like kibana/splunk - with filter box to
 maybe add a filer $text for sql like $interval on normal graph panel for quick drill down without having to edit all sql - help please
 
 example pouchdb to couchdb collecting metrics from mobile device / web browser 
-
-example adding metric via curl post/put to couch 
 
 example rollup stuff for aggregate/archiving/make new tables in postgres based on timestamp - pg function(s) to be run periodically to automate? - note with over 2 million docs the dashboard with 6 graphs and multiple series takes under 3 secs to redraw all of them with where clause on the timestamps at 24hrs so all datapoints for last 24hrs are being loaded. - note on http_pgsql extension to deal with managing/archivng couchdbs.
 
