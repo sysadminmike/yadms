@@ -63,7 +63,67 @@ Add something like below to crontab:
 
 ```*/5 * * * * /home/metrics/couch_get_server_stats.sh http://192.168.0.10:5984 http://192.168.0.100:5984/metricsdb```
 
-TODO: Add example sql and graphs of various metrics
+
+
+### Open Databases & Open OS Files
+
+```
+WITH couchdb_current AS (
+	SELECT (doc->>'ts')::numeric * 1000 AS time,
+	(doc->'couchdb'->'open_databases'->>'current')::numeric AS open_databases,
+	(doc->'couchdb'->'open_os_files'->>'current')::numeric AS open_os_files
+	FROM abtest
+	WHERE doc->>'name'='mw-staging.couchdb' 
+	AND ( to_timestamp((doc->>'ts')::numeric) > now() - interval '12h')
+),
+
+results AS (    
+  SELECT '{ "results": [' AS v     
+  UNION ALL
+  SELECT '{ "series": [{ "name": "mw-staging.couchdb.open_databases", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,open_databases))  || ' }] }'
+    AS v FROM couchdb_current 
+  UNION ALL
+  SELECT ',{ "series": [{ "name": "mw-staging.couchdb.open_os_files", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,open_os_files))  || ' }] }'
+    AS v FROM couchdb_current 
+  UNION ALL
+  SELECT ']}' AS v   
+)
+SELECT string_agg(v,'') AS ret FROM results
+```
+
+![Example couch open dbs and files](/pics/couchdb/couch-open-dbs-files.png)
+
+
+### Reads / Writes per minute
+
+```
+WITH couch_read_writes AS (
+  SELECT (doc->>'ts')::numeric * 1000 AS  time,
+         ((doc->'couchdb'->'database_reads'->>'current')::numeric - lag((doc->'couchdb'->'database_reads'->>'current')::numeric, 1) OVER w )
+           / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1) OVER w)::numeric AS  database_reads_per_sec,
+         ((doc->'couchdb'->'database_writes'->>'current')::numeric - lag((doc->'couchdb'->'database_writes'->>'current')::numeric, 1) OVER w )
+           / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1) OVER w)::numeric AS  database_writes_per_sec 
+	FROM abtest
+	WHERE doc->>'name'='mw-staging.couchdb' 
+	AND ( to_timestamp((doc->>'ts')::numeric) > now() - interval '12h')
+	  WINDOW w AS  (ORDER BY (doc->>'ts')::numeric)   
+	ORDER BY time
+),
+results AS (    
+  SELECT '{ "results": [' AS v     
+  UNION ALL
+   SELECT '{ "series": [{ "name": "mw-staging.couchdb.database_reads_per_min", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(database_reads_per_sec,2)*60))  || ' }] }'
+    AS v FROM couch_read_writes 
+  UNION ALL 
+   SELECT ',{ "series": [{ "name": "mw-staging.couchdb.database_writes_per_min", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(database_writes_per_sec,2)*60))  || ' }] }'
+    AS v FROM couch_read_writes 
+  UNION ALL
+  SELECT ']}' AS v   
+ )
+ SELECT string_agg(v,'') AS ret FROM results
+```
+
+![Example couch read/writes per min](/pics/couchdb/couch-read-write.png)
 
 
 ##Metrics on databases
@@ -143,6 +203,5 @@ Add something like below to crontab:
 ```0 0,6,12,18 * * * /home/metrics/couch_get_dbs_stats.sh http://192.168.0.10:5984 http://192.168.0.100:5984/metricsdb```
 
 Adjust frequency of collection as required.
-
 
 TODO: Add example sql and graphs of various metrics
