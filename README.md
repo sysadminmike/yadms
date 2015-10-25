@@ -11,7 +11,7 @@ Allows for flexible collection of metrics with no strict schema making it very s
 
 Below is an example using symon/symux to collect metrics.
 
-[Couchdb metrics](./couchdb/README.mc)
+[Couchdb metrics](./couchdb/README.md)
 
 ## Setup of host(s) sending metrics
 
