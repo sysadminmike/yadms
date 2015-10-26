@@ -444,6 +444,31 @@ When the doc.type map/reduce is in place and the couch_get_dbs_stats.sh has it e
 
 Below will return all of the doc types count series for a metric and couch db name:
 ```
+
+CREATE OR REPLACE VIEW couch_dbs_stats AS 
+ WITH dbs AS (
+         SELECT abtest.doc ->> 'ts'::text AS "time",
+            abtest.doc ->> 'name'::text AS metric_name,
+            json_array_elements((abtest.doc ->> 'dbs'::text)::json) AS adoc
+           FROM abtest
+          WHERE (abtest.doc ->> 'type'::text) = 'couch_dbs_stats'::text
+        ), doc_types_counts_working AS (
+         SELECT dbs."time",
+            dbs.metric_name,
+            dbs.adoc ->> 'db_name'::text AS db_name,
+            json_array_elements((dbs.adoc ->> 'doc_types_count'::text)::json) AS mdoc
+           FROM dbs
+          WHERE (dbs.adoc ->> 'doc_types_count'::text) IS NOT NULL
+        )
+ SELECT doc_types_counts_working."time",
+    doc_types_counts_working.metric_name,
+    doc_types_counts_working.db_name,
+    json_object_keys(doc_types_counts_working.mdoc) AS doc_type,
+    doc_types_counts_working.mdoc ->> json_object_keys(doc_types_counts_working.mdoc) AS doc_count
+   FROM doc_types_counts_working;
+```
+
+```
 CREATE OR REPLACE FUNCTION get_couch_dbs_doc_type_counts(metricname TEXT, dbname TEXT)
   RETURNS text AS
 $BODY$
