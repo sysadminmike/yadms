@@ -351,3 +351,126 @@ Add something like below to crontab:
 Adjust frequency of collection as required.
 
 TODO: Add example sql and graphs of various metrics
+
+
+
+### database doc types count 
+
+When the doc.type map/reduce is in place and the couch_get_dbs_stats.sh has it enabled a metric doc looks something like the below:
+
+```
+{
+   "_id": "3ad893cb4cf1560add7b4caffd4adfac",
+   "_rev": "1-41d8695a6d2d0a4dec24e9f90e67c967",
+   "name": "myname.couch_dbs_stats",
+   "type": "couch_dbs_stats",
+   "ts": 1445725502,
+   "dbs": [
+       {
+           "db_name": "aatest",
+           "doc_count": 2326396,
+           "doc_del_count": 0,
+           "update_seq": 2326398,
+           "purge_seq": 0,
+           "compact_running": false,
+           "disk_size": 641671281,
+           "data_size": 575344173,
+           "instance_start_time": "1445258443050873",
+           "disk_format_version": 6,
+           "committed_update_seq": 2326398,
+           "doc_types_count": [
+               {
+                   "counter": 594423
+               },
+               {
+                   "counter_rate": 51942
+               },
+               {
+                   "cpu": 9813
+               },
+               {
+                   "gauges": 542081
+               },
+               {
+                   "if": 9809
+               },
+               {
+                   "io": 14706
+               },
+               {
+                   "load": 9809
+               },
+               {
+                   "mem": 9809
+               },
+               {
+                   "null": 2
+               },
+               {
+                   "set": 542000
+               },
+               {
+                   "timers": 542000
+               }
+           ]
+       },
+       {
+           "db_name": "abtest",
+           "doc_count": 315,
+           "doc_del_count": 4,
+           "update_seq": 326,
+           "purge_seq": 0,
+           "compact_running": false,
+           "disk_size": 163953,
+           "data_size": 75808,
+           "instance_start_time": "1445545165301518",
+           "disk_format_version": 6,
+           "committed_update_seq": 326,
+           "doc_types_count": [
+               {
+                   "counter": 311
+               },
+               {
+                   "gauge": 2
+               },
+               {
+                   "timers": 1
+               }
+           ]
+       }
+   ]
+}
+```
+
+Below will return all of the doc types count series for a metric and couch db name:
+```
+CREATE OR REPLACE FUNCTION get_couch_dbs_doc_type_counts(metricname TEXT, dbname TEXT)
+  RETURNS text AS
+$BODY$
+DECLARE  
+  doctype text;
+  rec record;
+  sql TEXT := '';
+  result TEXT;
+BEGIN
+  FOR doctype IN   
+      SELECT DISTINCT doc_type AS doctype FROM couch_dbs_stats WHERE metric_name=metricname AND db_name=dbname
+  LOOP
+    sql := sql || 'SELECT '',{ "series": [{ "name": "' || dbname || '.' || doctype || '", "columns": ["time", "count"], "values": '' || json_agg(json_build_array((time::numeric * 1000),doc_count::numeric))  || '' }] }'' AS v FROM couch_dbs_stats UNION ALL ';
+  END LOOP;
+  sql := 'SELECT ''' || left( right(sql,length(sql)-9), -10 ) ;
+
+  result := '';
+  FOR rec IN EXECUTE sql LOOP
+	result := result || rec.v;
+  END LOOP;
+  RETURN result;
+
+END
+$BODY$
+  LANGUAGE plpgsql;
+```
+To be called from grafana as:
+```
+SELECT '{ "results": [' || get_couch_dbs_doc_type_counts('myname.couch_dbs_stats','aatest') || ']}' AS ret
+```
