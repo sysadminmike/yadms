@@ -2,6 +2,8 @@
 
 There are two scripts to pull metrics from a couchdb server and its databases - both need json npm (npm -i json)
 
+![Example couch dashboard](/couchdb/pics/couch.png)
+
 ##Metrics from couchdb server (/_stats)
 
 ```couch_get_server_stats.sh couch_host metrics_host_and_db [metric-host-name]```
