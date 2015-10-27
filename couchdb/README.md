@@ -224,21 +224,21 @@ Note: Ledgend min, max, avg, current and total are from grafana and not the couc
 ```
 
 WITH httpd AS (
-    SELECT (doc->>'ts')::numeric * 1000 AS  time,
-         ((doc->'httpd'->'clients_requesting_changes'->>'current')::numeric - lag((doc->'httpd'->'clients_requesting_changes'->>'current')::numeric, 1) OVER w )
-           / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1) OVER w)::numeric AS clients_requesting_changes_per_sec,
-         ((doc->'httpd'->'requests'->>'current')::numeric - lag((doc->'httpd'->'requests'->>'current')::numeric, 1) OVER w )
-           / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1) OVER w)::numeric AS requests_per_sec,
-         ((doc->'httpd'->'bulk_requests'->>'current')::numeric - lag((doc->'httpd'->'bulk_requests'->>'current')::numeric, 1) OVER w )
-           / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1) OVER w)::numeric AS bulk_requests_per_sec,
-         ((doc->'httpd'->'view_reads'->>'current')::numeric - lag((doc->'httpd'->'view_reads'->>'current')::numeric, 1) OVER w )
-           / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1) OVER w)::numeric AS view_reads_per_sec,
-         ((doc->'httpd'->'temporary_view_reads'->>'current')::numeric - lag((doc->'httpd'->'temporary_view_reads'->>'current')::numeric, 1) OVER w )
-           / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1) OVER w)::numeric AS temporary_view_reads_per_sec
+    SELECT (doc->>'ts')::numeric * 1000 AS  time, id,
+         ((doc->'httpd'->'clients_requesting_changes'->>'current')::numeric - 
+         lag((doc->'httpd'->'clients_requesting_changes'->>'current')::numeric, 1,'0') OVER w )
+           / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1, '1') OVER w)::numeric AS clients_requesting_changes_per_sec,           
+         ((doc->'httpd'->'requests'->>'current')::numeric - lag((doc->'httpd'->'requests'->>'current')::numeric, 1, '0') OVER w )
+           / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1, '1') OVER w)::numeric AS requests_per_sec,
+         ((doc->'httpd'->'bulk_requests'->>'current')::numeric - lag((doc->'httpd'->'bulk_requests'->>'current')::numeric, 1, '0') OVER w )
+           / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1, '1') OVER w)::numeric AS bulk_requests_per_sec,
+         ((doc->'httpd'->'view_reads'->>'current')::numeric - lag((doc->'httpd'->'view_reads'->>'current')::numeric, 1, '0') OVER w )
+           / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1, '1') OVER w)::numeric AS view_reads_per_sec,
+         ((doc->'httpd'->'temporary_view_reads'->>'current')::numeric - lag((doc->'httpd'->'temporary_view_reads'->>'current')::numeric, 1, '0') OVER w )
+           / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1, '1') OVER w)::numeric AS temporary_view_reads_per_sec
     FROM abtest
-    WHERE doc->>'name'='mw-staging.couchdb' 
-    AND ( to_timestamp((doc->>'ts')::numeric) > now() - interval '12h')
-    WINDOW w AS  (ORDER BY (doc->>'ts')::numeric)   
+    WHERE doc->>'name'='mel-couch.couchdb' 
+    WINDOW w AS  (ORDER BY (doc->>'ts')::numeric)    
     ORDER BY time
 ),         
 results AS (    
