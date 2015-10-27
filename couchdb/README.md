@@ -135,12 +135,12 @@ Note on the ```avg_request_time_ms_per_request``` shows how flexible this can be
 ![Example couch read/writes per min](/couchdb/pics/couch-read-write2.png)
 
 
-### Http status codes per sec
+### Http status codes & methods per sec
 
 ```
-WITH httpd_status_codes AS (
+WITH httpd_metrics AS (
   SELECT (doc->>'ts')::numeric * 1000 AS  time,
- 
+
          ((doc->'httpd_status_codes'->'200'->>'current')::numeric - lag((doc->'httpd_status_codes'->'200'->>'current')::numeric, 1, '0') OVER w )
            / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1, '1') OVER w)::numeric AS  code_200_per_sec,
          ((doc->'httpd_status_codes'->'201'->>'current')::numeric - lag((doc->'httpd_status_codes'->'201'->>'current')::numeric, 1, '0') OVER w )
@@ -167,11 +167,24 @@ WITH httpd_status_codes AS (
             / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1, '1') OVER w)::numeric AS  code_412_per_sec,
 
          ((doc->'httpd_status_codes'->'500'->>'current')::numeric - lag((doc->'httpd_status_codes'->'500'->>'current')::numeric, 1, '0') OVER w )
-            / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1, '1') OVER w)::numeric AS  code_500_per_sec
+            / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1, '1') OVER w)::numeric AS  code_500_per_sec,
+
+         ((doc->'httpd_request_methods'->'PUT'->>'current')::numeric - lag((doc->'httpd_request_methods'->'PUT'->>'current')::numeric, 1, '0') OVER w )
+            / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1, '1') OVER w)::numeric AS  put_per_sec,
+         ((doc->'httpd_request_methods'->'GET'->>'current')::numeric - lag((doc->'httpd_request_methods'->'GET'->>'current')::numeric, 1, '0') OVER w )
+            / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1, '1') OVER w)::numeric AS  get_per_sec,
+         ((doc->'httpd_request_methods'->'POST'->>'current')::numeric - lag((doc->'httpd_request_methods'->'POST'->>'current')::numeric, 1, '0') OVER w )
+            / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1, '1') OVER w)::numeric AS  post_per_sec,
+         ((doc->'httpd_request_methods'->'DELETE'->>'current')::numeric - lag((doc->'httpd_request_methods'->'DELETE'->>'current')::numeric, 1, '0') OVER w )
+            / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1, '1') OVER w)::numeric AS  delete_per_sec,
+         ((doc->'httpd_request_methods'->'HEAD'->>'current')::numeric - lag((doc->'httpd_request_methods'->'HEAD'->>'current')::numeric, 1, '0') OVER w )
+            / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1, '1') OVER w)::numeric AS  head_per_sec,
+         ((doc->'httpd_request_methods'->'COPY'->>'current')::numeric - lag((doc->'httpd_request_methods'->'COPY'->>'current')::numeric, 1, '0') OVER w )
+            / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1, '1') OVER w)::numeric AS  copy_per_sec
+
 
     FROM abtest
     WHERE doc->>'name'='mw-staging.couchdb' 
-    AND ( to_timestamp((doc->>'ts')::numeric) > now() - interval '12h')
       WINDOW w AS  (ORDER BY (doc->>'ts')::numeric)   
     ORDER BY time
 ),
@@ -180,51 +193,71 @@ results AS (
   UNION ALL
 
   SELECT '{ "series": [{ "name": "200", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(code_200_per_sec,2)))  || ' }] }'
-    AS v FROM httpd_status_codes 
+    AS v FROM httpd_metrics 
   UNION ALL
   SELECT ',{ "series": [{ "name": "201", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(code_201_per_sec,2)))  || ' }] }'
-    AS v FROM httpd_status_codes 
+    AS v FROM httpd_metrics 
   UNION ALL
   SELECT ',{ "series": [{ "name": "202", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(code_202_per_sec,2)))  || ' }] }'
-    AS v FROM httpd_status_codes 
+    AS v FROM httpd_metrics 
   UNION ALL
 
   SELECT ',{ "series": [{ "name": "301", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(code_301_per_sec,2)))  || ' }] }'
-    AS v FROM httpd_status_codes 
+    AS v FROM httpd_metrics 
   UNION ALL
   SELECT ',{ "series": [{ "name": "304", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(code_304_per_sec,2)))  || ' }] }'
-    AS v FROM httpd_status_codes 
+    AS v FROM httpd_metrics 
   UNION ALL
 
   SELECT ',{ "series": [{ "name": "400", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(code_400_per_sec,2)))  || ' }] }'
-    AS v FROM httpd_status_codes 
+    AS v FROM httpd_metrics 
   UNION ALL
   SELECT ',{ "series": [{ "name": "401", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(code_401_per_sec,2)))  || ' }] }'
-    AS v FROM httpd_status_codes 
+    AS v FROM httpd_metrics 
   UNION ALL
   SELECT ',{ "series": [{ "name": "403", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(code_403_per_sec,2)))  || ' }] }'
-    AS v FROM httpd_status_codes 
+    AS v FROM httpd_metrics 
   UNION ALL
   SELECT ',{ "series": [{ "name": "404", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(code_404_per_sec,2)))  || ' }] }'
-    AS v FROM httpd_status_codes 
+    AS v FROM httpd_metrics 
   UNION ALL
   SELECT ',{ "series": [{ "name": "409", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(code_409_per_sec,2)))  || ' }] }'
-    AS v FROM httpd_status_codes 
+    AS v FROM httpd_metrics 
   UNION ALL
   SELECT ',{ "series": [{ "name": "412", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(code_412_per_sec,2)))  || ' }] }'
-    AS v FROM httpd_status_codes 
+    AS v FROM httpd_metrics 
   UNION ALL
 
   SELECT ',{ "series": [{ "name": "500", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(code_500_per_sec,2)))  || ' }] }'
-    AS v FROM httpd_status_codes 
+    AS v FROM httpd_metrics 
   UNION ALL
-  
+
+
+  SELECT ',{ "series": [{ "name": "GET", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(get_per_sec,2)))  || ' }] }'
+    AS v FROM httpd_metrics 
+  UNION ALL
+  SELECT ',{ "series": [{ "name": "PUT", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(put_per_sec,2)))  || ' }] }'
+    AS v FROM httpd_metrics 
+  UNION ALL
+  SELECT ',{ "series": [{ "name": "POST", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(post_per_sec,2)))  || ' }] }'
+    AS v FROM httpd_metrics 
+  UNION ALL
+  SELECT ',{ "series": [{ "name": "DELETE", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(delete_per_sec,2)))  || ' }] }'
+    AS v FROM httpd_metrics 
+  UNION ALL
+  SELECT ',{ "series": [{ "name": "HEAD", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(head_per_sec,2)))  || ' }] }'
+    AS v FROM httpd_metrics 
+  UNION ALL
+  SELECT ',{ "series": [{ "name": "COPY", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(copy_per_sec,2)))  || ' }] }'
+    AS v FROM httpd_metrics 
+  UNION ALL
+
   SELECT ']}' AS v   
 )
-SELECT string_agg(v,'') AS ret FROM results
+SELECT string_agg(v,'') AS ret FROM results) AS ret FROM results
 ```
 
-![Example couch status codes per min](/couchdb/pics/couch-http-status-codes.png)
+![Example couch status codes per min](/couchdb/pics/couch-httpd2.png)
 Note: Ledgend min, max, avg, current and total are from grafana and not the couch stats doc.
 
 
