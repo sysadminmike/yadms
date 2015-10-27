@@ -132,7 +132,7 @@ results AS (
 
 Note on the ```avg_request_time_ms_per_request``` shows how flexible this can be as you can access other metrics collected to work this out - ie doc->'httpd'->'requests'->>'current' 
 
-![Example couch read/writes per min](/couchdb/pics/couch-read-write.png)
+![Example couch read/writes per min](/couchdb/pics/couch-read-write2.png)
 
 
 ### Http status codes per sec
