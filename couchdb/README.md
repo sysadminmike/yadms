@@ -108,7 +108,7 @@ WITH couch_read_writes AS (
          ((doc->'couchdb'->'request_time'->>'current')::numeric - lag((doc->'couchdb'->'request_time'->>'current')::numeric, 1, '0') OVER w )
          / ((doc->'httpd'->'requests'->>'current')::numeric - lag((doc->'httpd'->'requests'->>'current')::numeric, 1, '1') OVER w)::numeric AS  request_time_per_request
     FROM abtest
-    WHERE doc->>'name'='mel-couch.couchdb' 
+    WHERE doc->>'name'='mw-staging.couchdb' 
       WINDOW w AS  (ORDER BY (doc->>'ts')::numeric)   
     ORDER BY time
 ),
@@ -231,12 +231,9 @@ Note: Ledgend min, max, avg, current and total are from grafana and not the couc
 ### httpd info per sec
 
 ```
-
 WITH httpd AS (
     SELECT (doc->>'ts')::numeric * 1000 AS  time, id,
-         ((doc->'httpd'->'clients_requesting_changes'->>'current')::numeric - 
-         lag((doc->'httpd'->'clients_requesting_changes'->>'current')::numeric, 1,'0') OVER w )
-           / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1, '1') OVER w)::numeric AS clients_requesting_changes_per_sec,           
+         (doc->'httpd'->'clients_requesting_changes'->>'current')::numeric AS clients_requesting_changes,
          ((doc->'httpd'->'requests'->>'current')::numeric - lag((doc->'httpd'->'requests'->>'current')::numeric, 1, '0') OVER w )
            / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1, '1') OVER w)::numeric AS requests_per_sec,
          ((doc->'httpd'->'bulk_requests'->>'current')::numeric - lag((doc->'httpd'->'bulk_requests'->>'current')::numeric, 1, '0') OVER w )
@@ -253,8 +250,7 @@ WITH httpd AS (
 results AS (    
   SELECT '{ "results": [' AS v     
   UNION ALL           
-  
-  SELECT '{ "series": [{ "name": "clients_requesting_changes", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(clients_requesting_changes_per_sec,2)*60))  || ' }] }'
+  SELECT '{ "series": [{ "name": "clients_requesting_changes", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,clients_requesting_changes))  || ' }] }'
     AS v FROM httpd 
   UNION ALL
   SELECT ',{ "series": [{ "name": "requests", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(requests_per_sec,2)*60))  || ' }] }'
