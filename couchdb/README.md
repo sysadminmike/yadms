@@ -99,10 +99,10 @@ SELECT string_agg(v,'') AS ret FROM results
 ```
 WITH couch_read_writes AS (
   SELECT (doc->>'ts')::numeric * 1000 AS  time,
-         ((doc->'couchdb'->'database_reads'->>'current')::numeric - lag((doc->'couchdb'->'database_reads'->>'current')::numeric, 1) OVER w )
-           / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1) OVER w)::numeric AS  database_reads_per_sec,
-         ((doc->'couchdb'->'database_writes'->>'current')::numeric - lag((doc->'couchdb'->'database_writes'->>'current')::numeric, 1) OVER w )
-           / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1) OVER w)::numeric AS  database_writes_per_sec 
+         ((doc->'couchdb'->'database_reads'->>'current')::numeric - lag((doc->'couchdb'->'database_reads'->>'current')::numeric, 1, '0') OVER w )
+           / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1, '1') OVER w)::numeric AS  database_reads_per_sec,
+         ((doc->'couchdb'->'database_writes'->>'current')::numeric - lag((doc->'couchdb'->'database_writes'->>'current')::numeric, 1, '0') OVER w )
+           / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1, '1') OVER w)::numeric AS  database_writes_per_sec 
 	FROM abtest
 	WHERE doc->>'name'='mw-staging.couchdb' 
 	AND ( to_timestamp((doc->>'ts')::numeric) > now() - interval '12h')
@@ -237,7 +237,7 @@ WITH httpd AS (
          ((doc->'httpd'->'temporary_view_reads'->>'current')::numeric - lag((doc->'httpd'->'temporary_view_reads'->>'current')::numeric, 1, '0') OVER w )
            / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1, '1') OVER w)::numeric AS temporary_view_reads_per_sec
     FROM abtest
-    WHERE doc->>'name'='mel-couch.couchdb' 
+    WHERE doc->>'name'='mw-staging.couchdb' 
     WINDOW w AS  (ORDER BY (doc->>'ts')::numeric)    
     ORDER BY time
 ),         
