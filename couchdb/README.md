@@ -219,7 +219,7 @@ SELECT string_agg(v,'') AS ret FROM results
 Note: Ledgend min, max, avg, current and total are from grafana and not the couch stats doc.
 
 
-### httpd info per minute
+### httpd info per sec
 
 ```
 
