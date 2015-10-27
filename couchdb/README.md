@@ -96,7 +96,7 @@ SELECT string_agg(v,'') AS ret FROM results
 ![Example couch open dbs and files](/couchdb/pics/couch-open-dbs-files.png)
 
 
-### Reads / Writes per minute
+### Reads / Writes per sec + average time per request (ms)
 
 ```
 WITH couch_read_writes AS (
@@ -104,26 +104,33 @@ WITH couch_read_writes AS (
          ((doc->'couchdb'->'database_reads'->>'current')::numeric - lag((doc->'couchdb'->'database_reads'->>'current')::numeric, 1, '0') OVER w )
            / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1, '1') OVER w)::numeric AS  database_reads_per_sec,
          ((doc->'couchdb'->'database_writes'->>'current')::numeric - lag((doc->'couchdb'->'database_writes'->>'current')::numeric, 1, '0') OVER w )
-           / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1, '1') OVER w)::numeric AS  database_writes_per_sec 
-	FROM abtest
-	WHERE doc->>'name'='mw-staging.couchdb' 
-	AND ( to_timestamp((doc->>'ts')::numeric) > now() - interval '12h')
-	  WINDOW w AS  (ORDER BY (doc->>'ts')::numeric)   
-	ORDER BY time
+           / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1, '1') OVER w)::numeric AS  database_writes_per_sec,
+         ((doc->'couchdb'->'request_time'->>'current')::numeric - lag((doc->'couchdb'->'request_time'->>'current')::numeric, 1, '0') OVER w )
+         / ((doc->'httpd'->'requests'->>'current')::numeric - lag((doc->'httpd'->'requests'->>'current')::numeric, 1, '1') OVER w)::numeric AS  request_time_per_request
+    FROM abtest
+    WHERE doc->>'name'='mel-couch.couchdb' 
+      WINDOW w AS  (ORDER BY (doc->>'ts')::numeric)   
+    ORDER BY time
 ),
 results AS (    
   SELECT '{ "results": [' AS v     
   UNION ALL
-   SELECT '{ "series": [{ "name": "mw-staging.couchdb.database_reads_per_min", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(database_reads_per_sec,2)*60))  || ' }] }'
+   SELECT '{ "series": [{ "name": "database_reads_per_sec", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(database_reads_per_sec,2)))  || ' }] }'
     AS v FROM couch_read_writes 
   UNION ALL 
-   SELECT ',{ "series": [{ "name": "mw-staging.couchdb.database_writes_per_min", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(database_writes_per_sec,2)*60))  || ' }] }'
+   SELECT ',{ "series": [{ "name": "database_writes_per_sec", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(database_writes_per_sec,2)))  || ' }] }'
     AS v FROM couch_read_writes 
+  UNION ALL 
+   SELECT ',{ "series": [{ "name": "avg_request_time_ms_per_request", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(request_time_per_request*1000,2)))  || ' }] }'
+    AS v FROM couch_read_writes 
+
   UNION ALL
   SELECT ']}' AS v   
  )
  SELECT string_agg(v,'') AS ret FROM results
 ```
+
+Note on the ```avg_request_time_ms_per_request``` shows how flexible this can be as you can access other metrics collected to work this out - ie doc->'httpd'->'requests'->>'current' 
 
 ![Example couch read/writes per min](/couchdb/pics/couch-read-write.png)
 
