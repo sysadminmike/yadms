@@ -258,6 +258,8 @@ SELECT string_agg(v,'') AS ret FROM results) AS ret FROM results
 ```
 
 ![Example couch status codes per min](/couchdb/pics/couch-httpd2.png)
+
+![Example couch status codes per min](/couchdb/pics/couch-http-status-codes.png) 
 Note: Ledgend min, max, avg, current and total are from grafana and not the couch stats doc.
 
 
