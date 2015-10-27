@@ -126,40 +126,40 @@ results AS (
 ![Example couch read/writes per min](/couchdb/pics/couch-read-write.png)
 
 
-### Http status codes per minute
+### Http status codes per sec
 
 ```
 WITH httpd_status_codes AS (
   SELECT (doc->>'ts')::numeric * 1000 AS  time,
  
-         ((doc->'httpd_status_codes'->'200'->>'current')::numeric - lag((doc->'httpd_status_codes'->'200'->>'current')::numeric, 1) OVER w )
-           / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1) OVER w)::numeric AS  code_200_per_sec,
-         ((doc->'httpd_status_codes'->'201'->>'current')::numeric - lag((doc->'httpd_status_codes'->'201'->>'current')::numeric, 1) OVER w )
-            / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1) OVER w)::numeric AS  code_201_per_sec,
-         ((doc->'httpd_status_codes'->'202'->>'current')::numeric - lag((doc->'httpd_status_codes'->'202'->>'current')::numeric, 1) OVER w )
-            / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1) OVER w)::numeric AS  code_202_per_sec,
+         ((doc->'httpd_status_codes'->'200'->>'current')::numeric - lag((doc->'httpd_status_codes'->'200'->>'current')::numeric, 1, '0') OVER w )
+           / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1, '1') OVER w)::numeric AS  code_200_per_sec,
+         ((doc->'httpd_status_codes'->'201'->>'current')::numeric - lag((doc->'httpd_status_codes'->'201'->>'current')::numeric, 1, '0') OVER w )
+            / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1, '1') OVER w)::numeric AS  code_201_per_sec,
+         ((doc->'httpd_status_codes'->'202'->>'current')::numeric - lag((doc->'httpd_status_codes'->'202'->>'current')::numeric, 1, '0') OVER w )
+            / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1, '1') OVER w)::numeric AS  code_202_per_sec,
 
-         ((doc->'httpd_status_codes'->'301'->>'current')::numeric - lag((doc->'httpd_status_codes'->'301'->>'current')::numeric, 1) OVER w )
-            / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1) OVER w)::numeric AS  code_301_per_sec,
-         ((doc->'httpd_status_codes'->'304'->>'current')::numeric - lag((doc->'httpd_status_codes'->'304'->>'current')::numeric, 1) OVER w )
-            / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1) OVER w)::numeric AS  code_304_per_sec,
+         ((doc->'httpd_status_codes'->'301'->>'current')::numeric - lag((doc->'httpd_status_codes'->'301'->>'current')::numeric, 1, '0') OVER w )
+            / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1, '1') OVER w)::numeric AS  code_301_per_sec,
+         ((doc->'httpd_status_codes'->'304'->>'current')::numeric - lag((doc->'httpd_status_codes'->'304'->>'current')::numeric, 1, '0') OVER w )
+            / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1, '1') OVER w)::numeric AS  code_304_per_sec,
 
-         ((doc->'httpd_status_codes'->'400'->>'current')::numeric - lag((doc->'httpd_status_codes'->'400'->>'current')::numeric, 1) OVER w )
-           / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1) OVER w)::numeric AS  code_400_per_sec,
-         ((doc->'httpd_status_codes'->'401'->>'current')::numeric - lag((doc->'httpd_status_codes'->'401'->>'current')::numeric, 1) OVER w )
-            / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1) OVER w)::numeric AS  code_401_per_sec,
-         ((doc->'httpd_status_codes'->'403'->>'current')::numeric - lag((doc->'httpd_status_codes'->'403'->>'current')::numeric, 1) OVER w )
-            / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1) OVER w)::numeric AS  code_403_per_sec,
-         ((doc->'httpd_status_codes'->'404'->>'current')::numeric - lag((doc->'httpd_status_codes'->'404'->>'current')::numeric, 1) OVER w )
-            / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1) OVER w)::numeric AS  code_404_per_sec,
-         ((doc->'httpd_status_codes'->'409'->>'current')::numeric - lag((doc->'httpd_status_codes'->'409'->>'current')::numeric, 1) OVER w )
-            / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1) OVER w)::numeric AS  code_409_per_sec,
-         ((doc->'httpd_status_codes'->'412'->>'current')::numeric - lag((doc->'httpd_status_codes'->'412'->>'current')::numeric, 1) OVER w )
-            / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1) OVER w)::numeric AS  code_412_per_sec,
+         ((doc->'httpd_status_codes'->'400'->>'current')::numeric - lag((doc->'httpd_status_codes'->'400'->>'current')::numeric, 1, '0') OVER w )
+           / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1, '1') OVER w)::numeric AS  code_400_per_sec,
+         ((doc->'httpd_status_codes'->'401'->>'current')::numeric - lag((doc->'httpd_status_codes'->'401'->>'current')::numeric, 1, '0') OVER w )
+            / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1, '1') OVER w)::numeric AS  code_401_per_sec,
+         ((doc->'httpd_status_codes'->'403'->>'current')::numeric - lag((doc->'httpd_status_codes'->'403'->>'current')::numeric, 1, '0') OVER w )
+            / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1, '1') OVER w)::numeric AS  code_403_per_sec,
+         ((doc->'httpd_status_codes'->'404'->>'current')::numeric - lag((doc->'httpd_status_codes'->'404'->>'current')::numeric, 1, '0') OVER w )
+            / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1, '1') OVER w)::numeric AS  code_404_per_sec,
+         ((doc->'httpd_status_codes'->'409'->>'current')::numeric - lag((doc->'httpd_status_codes'->'409'->>'current')::numeric, 1, '0') OVER w )
+            / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1, '1') OVER w)::numeric AS  code_409_per_sec,
+         ((doc->'httpd_status_codes'->'412'->>'current')::numeric - lag((doc->'httpd_status_codes'->'412'->>'current')::numeric, 1, '0') OVER w )
+            / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1, '1') OVER w)::numeric AS  code_412_per_sec,
 
-         ((doc->'httpd_status_codes'->'500'->>'current')::numeric - lag((doc->'httpd_status_codes'->'500'->>'current')::numeric, 1) OVER w )
-            / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1) OVER w)::numeric AS  code_500_per_sec
-          
+         ((doc->'httpd_status_codes'->'500'->>'current')::numeric - lag((doc->'httpd_status_codes'->'500'->>'current')::numeric, 1, '0') OVER w )
+            / ((doc->>'ts')::numeric - lag((doc->>'ts')::numeric, 1, '1') OVER w)::numeric AS  code_500_per_sec
+
     FROM abtest
     WHERE doc->>'name'='mw-staging.couchdb' 
     AND ( to_timestamp((doc->>'ts')::numeric) > now() - interval '12h')
@@ -170,43 +170,43 @@ results AS (
   SELECT '{ "results": [' AS v     
   UNION ALL
 
-  SELECT '{ "series": [{ "name": "200", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(code_200_per_sec,2)*60))  || ' }] }'
+  SELECT '{ "series": [{ "name": "200", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(code_200_per_sec,2)))  || ' }] }'
     AS v FROM httpd_status_codes 
   UNION ALL
-  SELECT ',{ "series": [{ "name": "201", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(code_201_per_sec,2)*60))  || ' }] }'
+  SELECT ',{ "series": [{ "name": "201", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(code_201_per_sec,2)))  || ' }] }'
     AS v FROM httpd_status_codes 
   UNION ALL
-  SELECT ',{ "series": [{ "name": "202", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(code_202_per_sec,2)*60))  || ' }] }'
-    AS v FROM httpd_status_codes 
-  UNION ALL
-
-  SELECT ',{ "series": [{ "name": "301", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(code_301_per_sec,2)*60))  || ' }] }'
-    AS v FROM httpd_status_codes 
-  UNION ALL
-  SELECT ',{ "series": [{ "name": "304", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(code_304_per_sec,2)*60))  || ' }] }'
+  SELECT ',{ "series": [{ "name": "202", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(code_202_per_sec,2)))  || ' }] }'
     AS v FROM httpd_status_codes 
   UNION ALL
 
-  SELECT ',{ "series": [{ "name": "400", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(code_400_per_sec,2)*60))  || ' }] }'
+  SELECT ',{ "series": [{ "name": "301", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(code_301_per_sec,2)))  || ' }] }'
     AS v FROM httpd_status_codes 
   UNION ALL
-  SELECT ',{ "series": [{ "name": "401", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(code_401_per_sec,2)*60))  || ' }] }'
-    AS v FROM httpd_status_codes 
-  UNION ALL
-  SELECT ',{ "series": [{ "name": "403", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(code_403_per_sec,2)*60))  || ' }] }'
-    AS v FROM httpd_status_codes 
-  UNION ALL
-  SELECT ',{ "series": [{ "name": "404", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(code_404_per_sec,2)*60))  || ' }] }'
-    AS v FROM httpd_status_codes 
-  UNION ALL
-  SELECT ',{ "series": [{ "name": "409", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(code_409_per_sec,2)*60))  || ' }] }'
-    AS v FROM httpd_status_codes 
-  UNION ALL
-  SELECT ',{ "series": [{ "name": "412", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(code_412_per_sec,2)*60))  || ' }] }'
+  SELECT ',{ "series": [{ "name": "304", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(code_304_per_sec,2)))  || ' }] }'
     AS v FROM httpd_status_codes 
   UNION ALL
 
-  SELECT ',{ "series": [{ "name": "500", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(code_500_per_sec,2)*60))  || ' }] }'
+  SELECT ',{ "series": [{ "name": "400", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(code_400_per_sec,2)))  || ' }] }'
+    AS v FROM httpd_status_codes 
+  UNION ALL
+  SELECT ',{ "series": [{ "name": "401", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(code_401_per_sec,2)))  || ' }] }'
+    AS v FROM httpd_status_codes 
+  UNION ALL
+  SELECT ',{ "series": [{ "name": "403", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(code_403_per_sec,2)))  || ' }] }'
+    AS v FROM httpd_status_codes 
+  UNION ALL
+  SELECT ',{ "series": [{ "name": "404", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(code_404_per_sec,2)))  || ' }] }'
+    AS v FROM httpd_status_codes 
+  UNION ALL
+  SELECT ',{ "series": [{ "name": "409", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(code_409_per_sec,2)))  || ' }] }'
+    AS v FROM httpd_status_codes 
+  UNION ALL
+  SELECT ',{ "series": [{ "name": "412", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(code_412_per_sec,2)))  || ' }] }'
+    AS v FROM httpd_status_codes 
+  UNION ALL
+
+  SELECT ',{ "series": [{ "name": "500", "columns": ["time", "value"], "values": ' || json_agg(json_build_array(time,ROUND(code_500_per_sec,2)))  || ' }] }'
     AS v FROM httpd_status_codes 
   UNION ALL
   
