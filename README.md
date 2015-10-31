@@ -615,14 +615,11 @@ snmp - add metric data from snmp source
 fluentd - https://github.com/ixixi/fluent-plugin-couch - log stuff instead of logstash and elasticsearch - 
 https://github.com/grafana/grafana/pull/1771 - fingers crossed will get added soon as this looks ideal:
 
-*The table itself can render any kind of data (including text) without any issue.
+*The table itself can render any kind of data (including text) without any issue.*
 
-However, the table is bound by the current query builders, which typically are designed for graphical timestamp data, so that is something to keep in mind. However, if you wanted to display log messages against timestamps, that would work fine.*
+*However, the table is bound by the current query builders, which typically are designed for graphical timestamp data, so that is something to keep in mind. However, if you wanted to display log messages against timestamps, that would work fine.*
 
-
-make a grafana panel to search log stuff like kibana/splunk - with filter box to pass filter text to sql like $interval for time - so graphs and logs can be viewed on the same dashboard and at the same time - help please
-
-maybe add a filer $text for sql like $interval on normal graph panel for quick drill down without having to edit all sql - help please
+Add search/filet to the above would panel would be ideal kibana/splunk replacement
 
 example pouchdb to couchdb collecting metrics from mobile device / web browser 
 
